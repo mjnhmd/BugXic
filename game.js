@@ -15,7 +15,7 @@
       name: 'Training',
       enemies: 1,
       enemySpeed: 60,
-      winPercent: 90,
+      winPercent: 95,
       walls: [
         [{ x: 0.375, y: 0.3333 }, { x: 0.45, y: 0.3333 }, { x: 0.45, y: 0.4333 }, { x: 0.375, y: 0.4333 }],
         [{ x: 0.625, y: 0.5833 }, { x: 0.7, y: 0.5833 }, { x: 0.7, y: 0.6833 }, { x: 0.625, y: 0.6833 }]
@@ -25,7 +25,7 @@
       name: 'Islands',
       enemies: 2,
       enemySpeed: 70,
-      winPercent: 90,
+      winPercent: 95,
       walls: [
         [{ x: 0.25, y: 0.25 }, { x: 0.35, y: 0.25 }, { x: 0.35, y: 0.3833 }, { x: 0.25, y: 0.3833 }],
         [{ x: 0.5, y: 0.4167 }, { x: 0.575, y: 0.4167 }, { x: 0.575, y: 0.5833 }, { x: 0.5, y: 0.5833 }],
@@ -37,7 +37,7 @@
       name: 'Corridor',
       enemies: 2,
       enemySpeed: 80,
-      winPercent: 90,
+      winPercent: 95,
       walls: [
         [{ x: 0.25, y: 0.1667 }, { x: 0.325, y: 0.1667 }, { x: 0.325, y: 0.5833 }, { x: 0.25, y: 0.5833 }],
         [{ x: 0.325, y: 0.4833 }, { x: 0.5625, y: 0.4833 }, { x: 0.5625, y: 0.5833 }, { x: 0.325, y: 0.5833 }],
@@ -48,7 +48,7 @@
       name: 'Open Field',
       enemies: 3,
       enemySpeed: 85,
-      winPercent: 90,
+      winPercent: 95,
       walls: [
         [{ x: 0.475, y: 0.4667 }, { x: 0.525, y: 0.4667 }, { x: 0.525, y: 0.5333 }, { x: 0.475, y: 0.5333 }]
       ]
@@ -57,7 +57,7 @@
       name: 'Hell',
       enemies: 4,
       enemySpeed: 100,
-      winPercent: 90,
+      winPercent: 95,
       walls: []
     }
   ];

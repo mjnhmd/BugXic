@@ -2,11 +2,11 @@
   'use strict';
 
   // ==================== Constants ====================
-  var W = 800, H = 600;
-  var BORDER = 10;
-  var PLAYER_RADIUS = 2;
-  var PLAYER_SPEED = 120;
-  var ENEMY_RADIUS = 6;
+  var BASE_W = 800, BASE_H = 600;
+  var BASE_BORDER = 10;
+  var BASE_PLAYER_RADIUS = 2;
+  var BASE_PLAYER_SPEED = 120;
+  var BASE_ENEMY_RADIUS = 6;
   var INITIAL_LIVES = 3;
   var SWIPE_THRESHOLD = 15;
 
@@ -17,8 +17,8 @@
       enemySpeed: 60,
       winPercent: 80,
       walls: [
-        [{ x: 300, y: 200 }, { x: 360, y: 200 }, { x: 360, y: 260 }, { x: 300, y: 260 }],
-        [{ x: 500, y: 350 }, { x: 560, y: 350 }, { x: 560, y: 410 }, { x: 500, y: 410 }]
+        [{ x: 0.375, y: 0.3333 }, { x: 0.45, y: 0.3333 }, { x: 0.45, y: 0.4333 }, { x: 0.375, y: 0.4333 }],
+        [{ x: 0.625, y: 0.5833 }, { x: 0.7, y: 0.5833 }, { x: 0.7, y: 0.6833 }, { x: 0.625, y: 0.6833 }]
       ]
     },
     {
@@ -27,10 +27,10 @@
       enemySpeed: 70,
       winPercent: 80,
       walls: [
-        [{ x: 200, y: 150 }, { x: 280, y: 150 }, { x: 280, y: 230 }, { x: 200, y: 230 }],
-        [{ x: 400, y: 250 }, { x: 460, y: 250 }, { x: 460, y: 350 }, { x: 400, y: 350 }],
-        [{ x: 550, y: 100 }, { x: 650, y: 100 }, { x: 650, y: 180 }, { x: 550, y: 180 }],
-        [{ x: 150, y: 380 }, { x: 250, y: 380 }, { x: 250, y: 460 }, { x: 150, y: 460 }]
+        [{ x: 0.25, y: 0.25 }, { x: 0.35, y: 0.25 }, { x: 0.35, y: 0.3833 }, { x: 0.25, y: 0.3833 }],
+        [{ x: 0.5, y: 0.4167 }, { x: 0.575, y: 0.4167 }, { x: 0.575, y: 0.5833 }, { x: 0.5, y: 0.5833 }],
+        [{ x: 0.6875, y: 0.1667 }, { x: 0.8125, y: 0.1667 }, { x: 0.8125, y: 0.3 }, { x: 0.6875, y: 0.3 }],
+        [{ x: 0.1875, y: 0.6333 }, { x: 0.3125, y: 0.6333 }, { x: 0.3125, y: 0.7667 }, { x: 0.1875, y: 0.7667 }]
       ]
     },
     {
@@ -39,9 +39,9 @@
       enemySpeed: 80,
       winPercent: 80,
       walls: [
-        [{ x: 200, y: 100 }, { x: 260, y: 100 }, { x: 260, y: 350 }, { x: 200, y: 350 }],
-        [{ x: 260, y: 290 }, { x: 450, y: 290 }, { x: 450, y: 350 }, { x: 260, y: 350 }],
-        [{ x: 550, y: 400 }, { x: 620, y: 400 }, { x: 620, y: 470 }, { x: 550, y: 470 }]
+        [{ x: 0.25, y: 0.1667 }, { x: 0.325, y: 0.1667 }, { x: 0.325, y: 0.5833 }, { x: 0.25, y: 0.5833 }],
+        [{ x: 0.325, y: 0.4833 }, { x: 0.5625, y: 0.4833 }, { x: 0.5625, y: 0.5833 }, { x: 0.325, y: 0.5833 }],
+        [{ x: 0.6875, y: 0.6667 }, { x: 0.775, y: 0.6667 }, { x: 0.775, y: 0.7833 }, { x: 0.6875, y: 0.7833 }]
       ]
     },
     {
@@ -50,7 +50,7 @@
       enemySpeed: 85,
       winPercent: 80,
       walls: [
-        [{ x: 380, y: 280 }, { x: 420, y: 280 }, { x: 420, y: 320 }, { x: 380, y: 320 }]
+        [{ x: 0.475, y: 0.4667 }, { x: 0.525, y: 0.4667 }, { x: 0.525, y: 0.5333 }, { x: 0.475, y: 0.5333 }]
       ]
     },
     {
@@ -494,6 +494,8 @@
     this.trail = [];
     this.pendingDx = 0;
     this.pendingDy = 0;
+    this.speed = BASE_PLAYER_SPEED;
+    this.minTrailDistance = 0.5;
   }
 
   Player.prototype.reset = function (x, y) {
@@ -515,11 +517,11 @@
     if (cvy < 0 && dy === 1) return false;
 
     if (dx !== 0) {
-      this.vx = dx * PLAYER_SPEED;
+      this.vx = dx * this.speed;
       this.vy = 0;
     } else if (dy !== 0) {
       this.vx = 0;
-      this.vy = dy * PLAYER_SPEED;
+      this.vy = dy * this.speed;
     }
     return true;
   };
@@ -534,7 +536,7 @@
 
   Player.prototype.addTrailTurn = function () {
     var last = this.trail.length > 0 ? this.trail[this.trail.length - 1] : null;
-    if (!last || dist(last.x, last.y, this.x, this.y) > 0.5) {
+    if (!last || dist(last.x, last.y, this.x, this.y) > this.minTrailDistance) {
       this.trail.push({ x: this.x, y: this.y });
     }
   };
@@ -542,7 +544,7 @@
   Player.prototype.getTrailWithCurrent = function () {
     var arr = this.trail.slice();
     var last = arr.length > 0 ? arr[arr.length - 1] : null;
-    if (!last || dist(last.x, last.y, this.x, this.y) > 0.5) {
+    if (!last || dist(last.x, last.y, this.x, this.y) > this.minTrailDistance) {
       arr.push({ x: this.x, y: this.y });
     }
     return arr;
@@ -550,10 +552,10 @@
 
   // ==================== Enemy ====================
 
-  function Enemy(x, y, speed) {
+  function Enemy(x, y, speed, radius) {
     this.x = x;
     this.y = y;
-    this.radius = ENEMY_RADIUS;
+    this.radius = radius;
     var angle = Math.random() * Math.PI * 2;
     this.vx = Math.cos(angle) * speed;
     this.vy = Math.sin(angle) * speed;
@@ -565,8 +567,16 @@
   function Game() {
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
-    this.canvas.width = W;
-    this.canvas.height = H;
+    this.W = BASE_W;
+    this.H = BASE_H;
+    this.scaleFactor = 1;
+    this.border = BASE_BORDER;
+    this.playerRadius = BASE_PLAYER_RADIUS;
+    this.enemyRadius = BASE_ENEMY_RADIUS;
+    this.playerSpeed = BASE_PLAYER_SPEED;
+    this.trailWidth = 3;
+    this.canvas.width = this.W;
+    this.canvas.height = this.H;
 
     this.elLives = document.getElementById('lives');
     this.elLevel = document.getElementById('level');
@@ -575,16 +585,16 @@
 
     this.sound = new SoundManager();
     this.particles = new ParticleSystem();
-    this.cache = new SafeZoneCache(W, H);
+    this.cache = new SafeZoneCache(this.W, this.H);
     this.textures = new TextureManager();
     this.maskCanvas = document.createElement('canvas');
-    this.maskCanvas.width = W;
-    this.maskCanvas.height = H;
+    this.maskCanvas.width = this.W;
+    this.maskCanvas.height = this.H;
     this.maskCtx = this.maskCanvas.getContext('2d');
-    this.maskImageData = this.maskCtx.createImageData(W, H);
+    this.maskImageData = this.maskCtx.createImageData(this.W, this.H);
     this.grassCanvas = document.createElement('canvas');
-    this.grassCanvas.width = W;
-    this.grassCanvas.height = H;
+    this.grassCanvas.width = this.W;
+    this.grassCanvas.height = this.H;
     this.grassCtx = this.grassCanvas.getContext('2d');
 
     this.gameState = GameState.MENU;
@@ -602,8 +612,7 @@
     this.customEnemies = 0;
     this.menuSelection = 0;
 
-    this.totalArea = W * H;
-    this.scale = 1;
+    this.totalArea = this.W * this.H;
     this.lastTime = 0;
     this.gameTime = 0;
     this.touchStart = null;
@@ -617,11 +626,51 @@
 
   // ---- Resize ----
   Game.prototype.handleResize = function () {
-    var sw = window.innerWidth * 0.95;
-    var sh = window.innerHeight * 0.85;
-    this.scale = Math.min(sw / W, sh / H);
-    this.canvas.style.width = (W * this.scale) + 'px';
-    this.canvas.style.height = (H * this.scale) + 'px';
+    if (this.gameState === GameState.PLAYING) {
+      return;
+    }
+
+    var container = document.getElementById('game-container');
+    var info = document.getElementById('game-info');
+    var hints = document.getElementById('control-hints');
+    var rect = container.getBoundingClientRect();
+    var infoHeight = info ? info.getBoundingClientRect().height : 0;
+    var hintsHeight = hints ? hints.getBoundingClientRect().height : 0;
+    var padding = 12;
+
+    var availableW = Math.max(200, rect.width - padding * 2);
+    var availableH = Math.max(200, rect.height - infoHeight - hintsHeight - padding * 3);
+
+    var targetW = Math.floor(availableW);
+    var targetH = Math.floor(availableH);
+
+    if (targetW === this.W && targetH === this.H) return;
+
+    this.W = targetW;
+    this.H = targetH;
+    this.canvas.width = this.W;
+    this.canvas.height = this.H;
+    this.scaleFactor = Math.min(this.W, this.H) / 600;
+    this.border = Math.round(BASE_BORDER * this.scaleFactor);
+    this.playerRadius = Math.max(2, BASE_PLAYER_RADIUS * this.scaleFactor);
+    this.enemyRadius = Math.max(4, BASE_ENEMY_RADIUS * this.scaleFactor);
+    this.playerSpeed = BASE_PLAYER_SPEED * this.scaleFactor;
+    this.trailWidth = Math.max(1, 3 * this.scaleFactor);
+    this.player.speed = this.playerSpeed;
+    this.player.minTrailDistance = Math.max(0.5, 0.5 * this.scaleFactor);
+
+    this.cache = new SafeZoneCache(this.W, this.H);
+    this.maskCanvas.width = this.W;
+    this.maskCanvas.height = this.H;
+    this.maskCtx = this.maskCanvas.getContext('2d');
+    this.maskImageData = this.maskCtx.createImageData(this.W, this.H);
+    this.grassCanvas.width = this.W;
+    this.grassCanvas.height = this.H;
+    this.grassCtx = this.grassCanvas.getContext('2d');
+
+    this.totalArea = this.W * this.H;
+    this.buildInitialSafeZones();
+    this.render();
   };
 
   // ---- Safe Zone Management ----
@@ -629,25 +678,32 @@
   Game.prototype.buildInitialSafeZones = function () {
     this.safeZones = [];
 
-    var B = BORDER;
+    var B = this.border;
+    var w = this.W;
+    var h = this.H;
 
     this.safeZones.push([
-      { x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: B }, { x: 0, y: B }
+      { x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: B }, { x: 0, y: B }
     ]);
     this.safeZones.push([
-      { x: 0, y: H - B }, { x: W, y: H - B }, { x: W, y: H }, { x: 0, y: H }
+      { x: 0, y: h - B }, { x: w, y: h - B }, { x: w, y: h }, { x: 0, y: h }
     ]);
     this.safeZones.push([
-      { x: 0, y: B }, { x: B, y: B }, { x: B, y: H - B }, { x: 0, y: H - B }
+      { x: 0, y: B }, { x: B, y: B }, { x: B, y: h - B }, { x: 0, y: h - B }
     ]);
     this.safeZones.push([
-      { x: W - B, y: B }, { x: W, y: B }, { x: W, y: H - B }, { x: W - B, y: H - B }
+      { x: w - B, y: B }, { x: w, y: B }, { x: w, y: h - B }, { x: w - B, y: h - B }
     ]);
 
     var level = LEVELS[this.currentLevel];
     if (level.walls) {
       for (var w = 0; w < level.walls.length; w++) {
-        this.safeZones.push(level.walls[w].slice());
+        var wall = level.walls[w];
+        var scaled = [];
+        for (var p = 0; p < wall.length; p++) {
+          scaled.push({ x: wall[p].x * this.W, y: wall[p].y * this.H });
+        }
+        this.safeZones.push(scaled);
       }
     }
 
@@ -664,7 +720,7 @@
 
   Game.prototype.computeSafeArea = function () {
     var ctx = this.cache.ctx;
-    var data = ctx.getImageData(0, 0, W, H).data;
+    var data = ctx.getImageData(0, 0, this.W, this.H).data;
     var count = 0;
     for (var i = 0; i < data.length; i += 4) {
       if (data[i] > 128) count++;
@@ -685,9 +741,11 @@
   Game.prototype.startLevel = function () {
     this.buildInitialSafeZones();
 
-    var spawnX = W / 2;
-    var spawnY = BORDER / 2;
+    var spawnX = this.W / 2;
+    var spawnY = this.border / 2;
     this.player.reset(spawnX, spawnY);
+    this.player.speed = this.playerSpeed;
+    this.player.minTrailDistance = Math.max(0.5, 0.5 * this.scaleFactor);
 
     this.spawnEnemies();
     this.updateProgress();
@@ -704,28 +762,28 @@
   Game.prototype.getEnemySpeed = function () {
     var level = LEVELS[this.currentLevel];
     var diffMult = [0.7, 1, 1.4][this.difficulty] || 1;
-    return level.enemySpeed * diffMult;
+    return level.enemySpeed * diffMult * this.scaleFactor;
   };
 
   Game.prototype.spawnEnemies = function () {
     this.enemies = [];
     var count = this.getEnemyCount();
     var speed = this.getEnemySpeed();
-    var margin = BORDER + ENEMY_RADIUS * 2 + 10;
+    var margin = this.border + this.enemyRadius * 2 + 10 * this.scaleFactor;
 
     for (var i = 0; i < count; i++) {
       var attempts = 0;
       while (attempts < 100) {
-        var ex = margin + Math.random() * (W - 2 * margin);
-        var ey = margin + Math.random() * (H - 2 * margin);
+        var ex = margin + Math.random() * (this.W - 2 * margin);
+        var ey = margin + Math.random() * (this.H - 2 * margin);
         if (!this.isPointSafe(ex, ey)) {
-          this.enemies.push(new Enemy(ex, ey, speed));
+          this.enemies.push(new Enemy(ex, ey, speed, this.enemyRadius));
           break;
         }
         attempts++;
       }
       if (attempts >= 100) {
-        this.enemies.push(new Enemy(W / 2, H / 2, speed));
+        this.enemies.push(new Enemy(this.W / 2, this.H / 2, speed, this.enemyRadius));
       }
     }
   };
@@ -789,8 +847,8 @@
     this.canvas.addEventListener('click', function (e) {
       if (self.gameState === GameState.MENU) {
         var rect = self.canvas.getBoundingClientRect();
-        var mx = (e.clientX - rect.left) / self.scale;
-        var my = (e.clientY - rect.top) / self.scale;
+        var mx = e.clientX - rect.left;
+        var my = e.clientY - rect.top;
         self.handleMenuClick(mx, my);
       }
     });
@@ -885,7 +943,11 @@
       var ddx = endX - this.touchStart.x;
       var ddy = endY - this.touchStart.y;
       if (Math.abs(ddx) < SWIPE_THRESHOLD && Math.abs(ddy) < SWIPE_THRESHOLD) {
-        this.startGame();
+        // Tap — treat as click on menu UI elements
+        var rect = this.canvas.getBoundingClientRect();
+        var mx = endX - rect.left;
+        var my = endY - rect.top;
+        this.handleMenuClick(mx, my);
       } else if (Math.abs(ddx) > Math.abs(ddy)) {
         if (this.menuSelection === 0) {
           this.difficulty = clamp(this.difficulty + (ddx > 0 ? 1 : -1), 0, 2);
@@ -1003,9 +1065,9 @@
     var hitBoundary = false;
 
     if (p.x < 0) { p.x = 0; if (p.vx < 0) { p.vx = 0; hitBoundary = true; } }
-    if (p.x > W) { p.x = W; if (p.vx > 0) { p.vx = 0; hitBoundary = true; } }
+    if (p.x > this.W) { p.x = this.W; if (p.vx > 0) { p.vx = 0; hitBoundary = true; } }
     if (p.y < 0) { p.y = 0; if (p.vy < 0) { p.vy = 0; hitBoundary = true; } }
-    if (p.y > H) { p.y = H; if (p.vy > 0) { p.vy = 0; hitBoundary = true; } }
+    if (p.y > this.H) { p.y = this.H; if (p.vy > 0) { p.vy = 0; hitBoundary = true; } }
 
     if (hitBoundary && p.state === PlayerState.DRAWING) {
       p.addTrailTurn();
@@ -1051,8 +1113,8 @@
         enemy.y = testY;
       }
 
-      enemy.x = clamp(enemy.x, BORDER + r, W - BORDER - r);
-      enemy.y = clamp(enemy.y, BORDER + r, H - BORDER - r);
+      enemy.x = clamp(enemy.x, this.border + r, this.W - this.border - r);
+      enemy.y = clamp(enemy.y, this.border + r, this.H - this.border - r);
 
       if (this.isPointSafe(enemy.x, enemy.y)) {
         this.pushEnemyOutOfSafe(enemy);
@@ -1068,8 +1130,8 @@
       for (var d = 1; d < 40; d += 2) {
         var tx = enemy.x + Math.cos(angle) * d;
         var ty = enemy.y + Math.sin(angle) * d;
-        if (tx > BORDER + enemy.radius && tx < W - BORDER - enemy.radius &&
-          ty > BORDER + enemy.radius && ty < H - BORDER - enemy.radius &&
+        if (tx > this.border + enemy.radius && tx < this.W - this.border - enemy.radius &&
+          ty > this.border + enemy.radius && ty < this.H - this.border - enemy.radius &&
           !this.isPointSafe(tx, ty)) {
           enemy.x = tx;
           enemy.y = ty;
@@ -1094,7 +1156,7 @@
       var ecx = enemy.x, ecy = enemy.y;
       var er = enemy.radius;
 
-      if (dist(ecx, ecy, p.x, p.y) < er + PLAYER_RADIUS) {
+      if (dist(ecx, ecy, p.x, p.y) < er + this.playerRadius) {
         this.playerDeath();
         return;
       }
@@ -1130,9 +1192,11 @@
     this.particles.emit(this.player.x, this.player.y, 20, COLORS.ENEMY, 50);
     this.sound.play('death');
 
-    var spawnX = W / 2;
-    var spawnY = BORDER / 2;
+    var spawnX = this.W / 2;
+    var spawnY = this.border / 2;
     this.player.reset(spawnX, spawnY);
+    this.player.speed = this.playerSpeed;
+    this.player.minTrailDistance = Math.max(0.5, 0.5 * this.scaleFactor);
 
     if (this.lives <= 0) {
       this.gameOver();
@@ -1154,7 +1218,7 @@
     var cacheCtx = this.cache.ctx;
 
     cacheCtx.strokeStyle = '#ff0000';
-    cacheCtx.lineWidth = 3;
+    cacheCtx.lineWidth = this.trailWidth;
     cacheCtx.lineCap = 'round';
     cacheCtx.lineJoin = 'round';
     cacheCtx.beginPath();
@@ -1162,28 +1226,28 @@
     for (var i = 1; i < trail.length; i++) cacheCtx.lineTo(trail[i].x, trail[i].y);
     cacheCtx.stroke();
 
-    var imgData = cacheCtx.getImageData(0, 0, W, H);
+    var imgData = cacheCtx.getImageData(0, 0, this.W, this.H);
     var pix = imgData.data;
-    var grid = new Uint8Array(W * H);
-    for (var i = 0; i < W * H; i++) {
+    var grid = new Uint8Array(this.W * this.H);
+    for (var i = 0; i < this.W * this.H; i++) {
       grid[i] = pix[i * 4] > 128 ? 1 : 0;
     }
 
     var regions = [];
-    var regionMap = new Int32Array(W * H);
+    var regionMap = new Int32Array(this.W * this.H);
     for (var i = 0; i < regionMap.length; i++) regionMap[i] = -1;
 
-    for (var y = 0; y < H; y++) {
-      for (var x = 0; x < W; x++) {
-        var pos = y * W + x;
+    for (var y = 0; y < this.H; y++) {
+      for (var x = 0; x < this.W; x++) {
+        var pos = y * this.W + x;
         if (grid[pos] === 0 && regionMap[pos] === -1) {
           var regionId = regions.length;
-          var count = this.floodFillAndCount(grid, regionMap, W, H, x, y, regionId);
+          var count = this.floodFillAndCount(grid, regionMap, this.W, this.H, x, y, regionId);
           var hasEnemy = false;
           for (var e = 0; e < this.enemies.length; e++) {
-            var ex = clamp(Math.round(this.enemies[e].x), 0, W - 1);
-            var ey = clamp(Math.round(this.enemies[e].y), 0, H - 1);
-            if (regionMap[ey * W + ex] === regionId) { hasEnemy = true; break; }
+            var ex = clamp(Math.round(this.enemies[e].x), 0, this.W - 1);
+            var ey = clamp(Math.round(this.enemies[e].y), 0, this.H - 1);
+            if (regionMap[ey * this.W + ex] === regionId) { hasEnemy = true; break; }
           }
           regions.push({ id: regionId, count: count, hasEnemy: hasEnemy });
         }
@@ -1224,14 +1288,14 @@
 
     if (capturedCount < 10) return;
 
-    for (var i = 0; i < W * H; i++) {
+    for (var i = 0; i < this.W * this.H; i++) {
       if (regionMap[i] >= 0 && captureRegionIds[regionMap[i]]) {
         grid[i] = 1;
       }
     }
 
-    var newData = cacheCtx.createImageData(W, H);
-    for (var i = 0; i < W * H; i++) {
+    var newData = cacheCtx.createImageData(this.W, this.H);
+    for (var i = 0; i < this.W * this.H; i++) {
       var v = grid[i] ? 255 : 0;
       newData.data[i * 4] = v;
       newData.data[i * 4 + 1] = 0;
@@ -1243,9 +1307,9 @@
     var killedEnemies = [];
     for (var i = this.enemies.length - 1; i >= 0; i--) {
       var en = this.enemies[i];
-      var ex = clamp(Math.round(en.x), 0, W - 1);
-      var ey = clamp(Math.round(en.y), 0, H - 1);
-      if (regionMap[ey * W + ex] >= 0 && captureRegionIds[regionMap[ey * W + ex]]) {
+      var ex = clamp(Math.round(en.x), 0, this.W - 1);
+      var ey = clamp(Math.round(en.y), 0, this.H - 1);
+      if (regionMap[ey * this.W + ex] >= 0 && captureRegionIds[regionMap[ey * this.W + ex]]) {
         killedEnemies.push(this.enemies.splice(i, 1)[0]);
       }
     }
@@ -1320,12 +1384,12 @@
     if (trail.length < 2) return;
 
     var cutCanvas = document.createElement('canvas');
-    cutCanvas.width = W;
-    cutCanvas.height = H;
+    cutCanvas.width = this.W;
+    cutCanvas.height = this.H;
     var cutCtx = cutCanvas.getContext('2d', { willReadFrequently: true });
 
     cutCtx.fillStyle = '#000000';
-    cutCtx.fillRect(0, 0, W, H);
+    cutCtx.fillRect(0, 0, this.W, this.H);
 
     cutCtx.fillStyle = '#ffffff';
     for (var i = 0; i < this.safeZones.length; i++) {
@@ -1339,7 +1403,7 @@
     }
 
     cutCtx.strokeStyle = '#ffffff';
-    cutCtx.lineWidth = 3;
+    cutCtx.lineWidth = this.trailWidth;
     cutCtx.lineCap = 'round';
     cutCtx.lineJoin = 'round';
     cutCtx.beginPath();
@@ -1347,21 +1411,21 @@
     for (var i = 1; i < trail.length; i++) cutCtx.lineTo(trail[i].x, trail[i].y);
     cutCtx.stroke();
 
-    var imgData = cutCtx.getImageData(0, 0, W, H);
+    var imgData = cutCtx.getImageData(0, 0, this.W, this.H);
     var pix = imgData.data;
-    var grid = new Uint8Array(W * H);
+    var grid = new Uint8Array(this.W * this.H);
 
-    for (var i = 0; i < W * H; i++) {
+    for (var i = 0; i < this.W * this.H; i++) {
       grid[i] = pix[i * 4] > 128 ? 1 : 0;
     }
 
     var regions = [];
-    var regionMap = new Int32Array(W * H);
+    var regionMap = new Int32Array(this.W * this.H);
     for (var i = 0; i < regionMap.length; i++) regionMap[i] = -1;
 
-    for (var y = 0; y < H; y++) {
-      for (var x = 0; x < W; x++) {
-        var pos = y * W + x;
+    for (var y = 0; y < this.H; y++) {
+      for (var x = 0; x < this.W; x++) {
+        var pos = y * this.W + x;
         if (grid[pos] === 0 && regionMap[pos] === -1) {
           var regionId = regions.length;
           var count = 0;
@@ -1371,8 +1435,8 @@
           while (stack.length > 0) {
             var coord = stack.pop();
             var cx = coord[0], cy = coord[1];
-            if (cx < 0 || cx >= W || cy < 0 || cy >= H) continue;
-            var cpos = cy * W + cx;
+            if (cx < 0 || cx >= this.W || cy < 0 || cy >= this.H) continue;
+            var cpos = cy * this.W + cx;
             if (grid[cpos] !== 0 || regionMap[cpos] !== -1) continue;
             regionMap[cpos] = regionId;
             count++;
@@ -1383,9 +1447,9 @@
           }
 
           for (var e = 0; e < this.enemies.length; e++) {
-            var ex = clamp(Math.round(this.enemies[e].x), 0, W - 1);
-            var ey = clamp(Math.round(this.enemies[e].y), 0, H - 1);
-            if (regionMap[ey * W + ex] === regionId) {
+            var ex = clamp(Math.round(this.enemies[e].x), 0, this.W - 1);
+            var ey = clamp(Math.round(this.enemies[e].y), 0, this.H - 1);
+            if (regionMap[ey * this.W + ex] === regionId) {
               hasEnemy = true;
               break;
             }
@@ -1426,7 +1490,7 @@
     var captureSet = {};
     for (var c = 0; c < captureRegions.length; c++) captureSet[captureRegions[c]] = true;
 
-    for (var i = 0; i < W * H; i++) {
+    for (var i = 0; i < this.W * this.H; i++) {
       if (regionMap[i] >= 0 && captureSet[regionMap[i]]) {
         grid[i] = 1;
         capturedCount++;
@@ -1435,8 +1499,8 @@
 
     if (capturedCount < 10) return;
 
-    var newData = this.cache.ctx.createImageData(W, H);
-    for (var i = 0; i < W * H; i++) {
+    var newData = this.cache.ctx.createImageData(this.W, this.H);
+    for (var i = 0; i < this.W * this.H; i++) {
       var v = grid[i] ? 255 : 0;
       newData.data[i * 4] = v;
       newData.data[i * 4 + 1] = 0;
@@ -1445,10 +1509,10 @@
     }
     this.cache.ctx.putImageData(newData, 0, 0);
 
-    var minX = W, minY = H, maxX = 0, maxY = 0;
-    for (var y = BORDER; y < H - BORDER; y++) {
-      for (var x = BORDER; x < W - BORDER; x++) {
-        var pos = y * W + x;
+    var minX = this.W, minY = this.H, maxX = 0, maxY = 0;
+    for (var y = this.border; y < this.H - this.border; y++) {
+      for (var x = this.border; x < this.W - this.border; x++) {
+        var pos = y * this.W + x;
         if (regionMap[pos] >= 0 && captureSet[regionMap[pos]]) {
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
@@ -1467,9 +1531,9 @@
     var killedEnemies = [];
     for (var i = this.enemies.length - 1; i >= 0; i--) {
       var en = this.enemies[i];
-      var ex = clamp(Math.round(en.x), 0, W - 1);
-      var ey = clamp(Math.round(en.y), 0, H - 1);
-      var epos = ey * W + ex;
+      var ex = clamp(Math.round(en.x), 0, this.W - 1);
+      var ey = clamp(Math.round(en.y), 0, this.H - 1);
+      var epos = ey * this.W + ex;
       if (regionMap[epos] >= 0 && captureSet[regionMap[epos]]) {
         killedEnemies.push(this.enemies.splice(i, 1)[0]);
       }
@@ -1553,7 +1617,7 @@
   Game.prototype.render = function () {
     var ctx = this.ctx;
     ctx.fillStyle = COLORS.BG;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, this.W, this.H);
 
     if (this.gameState === GameState.MENU) {
       this.renderMenu();
@@ -1576,14 +1640,14 @@
 
   Game.prototype.renderSafeZones = function () {
     var ctx = this.ctx;
-    var cacheData = this.cache.ctx.getImageData(0, 0, W, H);
+    var cacheData = this.cache.ctx.getImageData(0, 0, this.W, this.H);
     var pix = cacheData.data;
 
     ctx.fillStyle = this.textures.patterns.dirt;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, this.W, this.H);
 
     var maskData = this.maskImageData.data;
-    for (var i = 0; i < W * H; i++) {
+    for (var i = 0; i < this.W * this.H; i++) {
       var isSafe = pix[i * 4] > 128;
       var idx = i * 4;
       maskData[idx] = 255;
@@ -1593,9 +1657,9 @@
     }
     this.maskCtx.putImageData(this.maskImageData, 0, 0);
 
-    this.grassCtx.clearRect(0, 0, W, H);
+    this.grassCtx.clearRect(0, 0, this.W, this.H);
     this.grassCtx.fillStyle = this.textures.patterns.grass;
-    this.grassCtx.fillRect(0, 0, W, H);
+    this.grassCtx.fillRect(0, 0, this.W, this.H);
     this.grassCtx.globalCompositeOperation = 'destination-in';
     this.grassCtx.drawImage(this.maskCanvas, 0, 0);
     this.grassCtx.globalCompositeOperation = 'source-over';
@@ -1603,10 +1667,10 @@
     ctx.drawImage(this.grassCanvas, 0, 0);
 
     ctx.fillStyle = this.textures.patterns.wood;
-    ctx.fillRect(0, 0, W, BORDER);
-    ctx.fillRect(0, H - BORDER, W, BORDER);
-    ctx.fillRect(0, BORDER, BORDER, H - 2 * BORDER);
-    ctx.fillRect(W - BORDER, BORDER, BORDER, H - 2 * BORDER);
+    ctx.fillRect(0, 0, this.W, this.border);
+    ctx.fillRect(0, this.H - this.border, this.W, this.border);
+    ctx.fillRect(0, this.border, this.border, this.H - 2 * this.border);
+    ctx.fillRect(this.W - this.border, this.border, this.border, this.H - 2 * this.border);
 
     var level = LEVELS[this.currentLevel];
     if (level.walls) {
@@ -1614,8 +1678,8 @@
       for (var w = 0; w < level.walls.length; w++) {
         var wall = level.walls[w];
         ctx.beginPath();
-        ctx.moveTo(wall[0].x, wall[0].y);
-        for (var j = 1; j < wall.length; j++) ctx.lineTo(wall[j].x, wall[j].y);
+        ctx.moveTo(wall[0].x * this.W, wall[0].y * this.H);
+        for (var j = 1; j < wall.length; j++) ctx.lineTo(wall[j].x * this.W, wall[j].y * this.H);
         ctx.closePath();
         ctx.fill();
       }
@@ -1625,7 +1689,7 @@
   Game.prototype.isBorderPoly = function (poly) {
     for (var i = 0; i < poly.length; i++) {
       var p = poly[i];
-      if (p.x <= 0 || p.x >= W || p.y <= 0 || p.y >= H) return true;
+      if (p.x <= 0 || p.x >= this.W || p.y <= 0 || p.y >= this.H) return true;
     }
     return false;
   };
@@ -1637,7 +1701,7 @@
     var trail = p.getTrailWithCurrent();
     var ctx = this.ctx;
 
-    ctx.lineWidth = 3;
+    ctx.lineWidth = this.trailWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(61, 43, 31, 0.6)';
@@ -1665,28 +1729,28 @@
 
     ctx.fillStyle = 'rgba(61, 43, 31, 0.55)';
     ctx.beginPath();
-    ctx.ellipse(p.x + 1.2, p.y + 2, PLAYER_RADIUS + 1, PLAYER_RADIUS * 0.9, 0, 0, Math.PI * 2);
+    ctx.ellipse(p.x + 1.2, p.y + 2, this.playerRadius + 1 * this.scaleFactor, this.playerRadius * 0.9, 0, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.fillStyle = '#d4a437';
     ctx.beginPath();
-    ctx.arc(p.x, p.y, PLAYER_RADIUS + 2.2, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, this.playerRadius + 2.2 * this.scaleFactor, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.fillStyle = COLORS.PLAYER;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, (PLAYER_RADIUS + 1.4) * pulse, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, (this.playerRadius + 1.4 * this.scaleFactor) * pulse, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.strokeStyle = '#f6c453';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = Math.max(1, 1 * this.scaleFactor);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, PLAYER_RADIUS + 2.6, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, this.playerRadius + 2.6 * this.scaleFactor, 0, Math.PI * 2);
     ctx.stroke();
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.beginPath();
-    ctx.arc(p.x - 0.8, p.y - 0.8, 1, 0, Math.PI * 2);
+    ctx.arc(p.x - 0.8 * this.scaleFactor, p.y - 0.8 * this.scaleFactor, Math.max(1, 1 * this.scaleFactor), 0, Math.PI * 2);
     ctx.fill();
   };
 
@@ -1701,7 +1765,7 @@
 
       ctx.fillStyle = 'rgba(44, 24, 16, 0.4)';
       ctx.beginPath();
-      ctx.ellipse(e.x + 0.5, e.y + e.radius + 2, e.radius * 0.8, e.radius * 0.35, 0, 0, Math.PI * 2);
+      ctx.ellipse(e.x + 0.5 * this.scaleFactor, e.y + e.radius + 2 * this.scaleFactor, e.radius * 0.8, e.radius * 0.35, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = COLORS.ENEMY;
@@ -1711,24 +1775,24 @@
 
       ctx.fillStyle = '#b07cc6';
       ctx.beginPath();
-      ctx.ellipse(e.x - 1.5, e.y - 2, e.radius * 0.45, e.radius * 0.35, 0, 0, Math.PI * 2);
+      ctx.ellipse(e.x - 1.5 * this.scaleFactor, e.y - 2 * this.scaleFactor, e.radius * 0.45, e.radius * 0.35, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = '#ffffff';
       var eyeOff = e.radius * 0.35;
       ctx.beginPath();
-      ctx.arc(e.x - eyeOff, e.y - eyeOff * 0.6, 2, 0, Math.PI * 2);
+      ctx.arc(e.x - eyeOff, e.y - eyeOff * 0.6, Math.max(1, 2 * this.scaleFactor), 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(e.x + eyeOff, e.y - eyeOff * 0.6, 2, 0, Math.PI * 2);
+      ctx.arc(e.x + eyeOff, e.y - eyeOff * 0.6, Math.max(1, 2 * this.scaleFactor), 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = '#2c1810';
       ctx.beginPath();
-      ctx.arc(e.x - eyeOff + 0.6, e.y - eyeOff * 0.6, 1, 0, Math.PI * 2);
+      ctx.arc(e.x - eyeOff + 0.6 * this.scaleFactor, e.y - eyeOff * 0.6, Math.max(1, 1 * this.scaleFactor), 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(e.x + eyeOff + 0.6, e.y - eyeOff * 0.6, 1, 0, Math.PI * 2);
+      ctx.arc(e.x + eyeOff + 0.6 * this.scaleFactor, e.y - eyeOff * 0.6, Math.max(1, 1 * this.scaleFactor), 0, Math.PI * 2);
       ctx.fill();
     }
   };
@@ -1741,15 +1805,15 @@
   };
 
   Game.prototype.handleMenuClick = function (mx, my) {
-    var cx = W / 2, cy = H / 2;
-    var diffY = cy + 10;
-    var enemyY = cy + 75;
-    var startY = cy + 150;
+    var cx = this.W / 2, cy = this.H / 2;
+    var diffY = cy + 10 * this.scaleFactor;
+    var enemyY = cy + 75 * this.scaleFactor;
+    var startY = cy + 140 * this.scaleFactor;
 
-    if (my > diffY - 18 && my < diffY + 18) {
+    if (my > diffY - 18 * this.scaleFactor && my < diffY + 18 * this.scaleFactor) {
       for (var d = 0; d < 3; d++) {
-        var dx = cx - 140 + d * 140;
-        if (mx > dx - 50 && mx < dx + 50) {
+        var dx = cx - 140 * this.scaleFactor + d * 140 * this.scaleFactor;
+        if (mx > dx - 50 * this.scaleFactor && mx < dx + 50 * this.scaleFactor) {
           this.difficulty = d;
           this.menuSelection = 0;
           return;
@@ -1757,120 +1821,120 @@
       }
     }
 
-    if (my > enemyY - 18 && my < enemyY + 18) {
+    if (my > enemyY - 18 * this.scaleFactor && my < enemyY + 18 * this.scaleFactor) {
       this.menuSelection = 1;
-      if (mx < cx - 40) {
+      if (mx < cx - 40 * this.scaleFactor) {
         this.customEnemies = Math.max(0, this.customEnemies - 1);
-      } else if (mx > cx + 40) {
+      } else if (mx > cx + 40 * this.scaleFactor) {
         this.customEnemies = Math.min(20, this.customEnemies + 1);
       }
       return;
     }
 
-    if (my > startY - 22 && my < startY + 22) {
+    if (my > startY - 22 * this.scaleFactor && my < startY + 22 * this.scaleFactor && mx > cx - 170 * this.scaleFactor && mx < cx + 170 * this.scaleFactor) {
       this.startGame();
     }
   };
 
   Game.prototype.renderMenu = function () {
     var ctx = this.ctx;
-    var cx = W / 2, cy = H / 2;
+    var cx = this.W / 2, cy = this.H / 2;
     var t = this.gameTime / 1000;
-    var skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+    var skyGrad = ctx.createLinearGradient(0, 0, 0, this.H);
     skyGrad.addColorStop(0, '#3a4f6b');
     skyGrad.addColorStop(0.5, '#5c4a3b');
     skyGrad.addColorStop(1, '#2c1810');
     ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, this.W, this.H);
 
     for (var i = 0; i < 28; i++) {
-      var sx = (Math.sin(t * 0.3 + i * 0.6) * 120 + cx + i * 22) % W;
-      var sy = ((i * 14 + t * 18) % (H * 0.7)) + 40;
+      var sx = (Math.sin(t * 0.3 + i * 0.6) * 120 * this.scaleFactor + cx + i * 22 * this.scaleFactor) % this.W;
+      var sy = ((i * 14 * this.scaleFactor + t * 18 * this.scaleFactor) % (this.H * 0.7)) + 40 * this.scaleFactor;
       var flicker = 0.35 + Math.sin(t * 4 + i) * 0.2;
       ctx.fillStyle = 'rgba(255, 224, 102, ' + flicker + ')';
       ctx.beginPath();
-      ctx.arc(sx, sy, 1.6, 0, Math.PI * 2);
+      ctx.arc(sx, sy, Math.max(1, 1.6 * this.scaleFactor), 0, Math.PI * 2);
       ctx.fill();
     }
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    ctx.font = 'bold 64px "Rajdhani", sans-serif';
+    ctx.font = 'bold ' + Math.round(64 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = '#3d2b1f';
-    ctx.fillText('XONIX', cx + 3, cy - 120 + 3);
+    ctx.fillText('XONIX', cx + 3 * this.scaleFactor, cy - 120 * this.scaleFactor + 3 * this.scaleFactor);
     ctx.fillStyle = '#d4a437';
-    ctx.fillText('XONIX', cx, cy - 120);
+    ctx.fillText('XONIX', cx, cy - 120 * this.scaleFactor);
 
-    ctx.font = 'italic 18px "Rajdhani", sans-serif';
+    ctx.font = 'italic ' + Math.round(18 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = 'rgba(253, 246, 227, 0.8)';
-    ctx.fillText('~ Farm Defense ~', cx, cy - 85);
+    ctx.fillText('~ Farm Defense ~', cx, cy - 85 * this.scaleFactor);
 
-    ctx.font = 'bold 16px "Rajdhani", sans-serif';
+    ctx.font = 'bold ' + Math.round(16 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = '#f5e7c9';
-    ctx.fillText('HIGH SCORE: ' + this.highScore, cx, cy - 55);
+    ctx.fillText('HIGH SCORE: ' + this.highScore, cx, cy - 55 * this.scaleFactor);
 
     ctx.fillStyle = '#6b4423';
-    ctx.fillRect(cx - 210, cy - 15, 420, 150);
+    ctx.fillRect(cx - 210 * this.scaleFactor, cy - 15 * this.scaleFactor, 420 * this.scaleFactor, 150 * this.scaleFactor);
     ctx.strokeStyle = '#b8860b';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(cx - 210, cy - 15, 420, 150);
+    ctx.lineWidth = Math.max(1, 3 * this.scaleFactor);
+    ctx.strokeRect(cx - 210 * this.scaleFactor, cy - 15 * this.scaleFactor, 420 * this.scaleFactor, 150 * this.scaleFactor);
     ctx.strokeStyle = 'rgba(255, 239, 213, 0.3)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(cx - 208, cy - 13, 416, 146);
+    ctx.lineWidth = Math.max(1, 1 * this.scaleFactor);
+    ctx.strokeRect(cx - 208 * this.scaleFactor, cy - 13 * this.scaleFactor, 416 * this.scaleFactor, 146 * this.scaleFactor);
 
-    var diffY = cy + 10;
+    var diffY = cy + 10 * this.scaleFactor;
     var diffNames = ['EASY', 'NORMAL', 'HARD'];
-    ctx.font = '14px "Rajdhani", sans-serif';
+    ctx.font = Math.round(14 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = this.menuSelection === 0 ? COLORS.TEXT : 'rgba(253, 246, 227, 0.6)';
-    ctx.fillText('DIFFICULTY', cx, diffY - 25);
+    ctx.fillText('DIFFICULTY', cx, diffY - 25 * this.scaleFactor);
 
     for (var d = 0; d < 3; d++) {
-      var dx = cx - 140 + d * 140;
+      var dx = cx - 140 * this.scaleFactor + d * 140 * this.scaleFactor;
       var isSelected = (this.difficulty === d);
       ctx.fillStyle = isSelected ? '#5a9a44' : 'rgba(61, 43, 31, 0.4)';
-      ctx.fillRect(dx - 50, diffY - 14, 100, 28);
+      ctx.fillRect(dx - 50 * this.scaleFactor, diffY - 14 * this.scaleFactor, 100 * this.scaleFactor, 28 * this.scaleFactor);
       ctx.strokeStyle = isSelected ? '#d4a437' : 'rgba(255, 239, 213, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(dx - 50, diffY - 14, 100, 28);
-      ctx.font = isSelected ? 'bold 17px "Rajdhani", sans-serif' : '16px "Rajdhani", sans-serif';
+      ctx.lineWidth = Math.max(1, 2 * this.scaleFactor);
+      ctx.strokeRect(dx - 50 * this.scaleFactor, diffY - 14 * this.scaleFactor, 100 * this.scaleFactor, 28 * this.scaleFactor);
+      ctx.font = isSelected ? 'bold ' + Math.round(17 * this.scaleFactor) + 'px "Rajdhani", sans-serif' : Math.round(16 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
       ctx.fillStyle = isSelected ? '#fdf6e3' : 'rgba(253, 246, 227, 0.6)';
       ctx.fillText(diffNames[d], dx, diffY);
     }
 
-    var enemyY = cy + 75;
-    ctx.font = '14px "Rajdhani", sans-serif';
+    var enemyY = cy + 75 * this.scaleFactor;
+    ctx.font = Math.round(14 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = this.menuSelection === 1 ? COLORS.TEXT : 'rgba(253, 246, 227, 0.6)';
-    ctx.fillText('ENEMIES', cx, enemyY - 22);
+    ctx.fillText('ENEMIES', cx, enemyY - 22 * this.scaleFactor);
 
-    ctx.font = 'bold 24px "Rajdhani", sans-serif';
+    ctx.font = 'bold ' + Math.round(24 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = '#f5e7c9';
-    ctx.fillText('<', cx - 80, enemyY);
-    ctx.fillText('>', cx + 80, enemyY);
+    ctx.fillText('<', cx - 80 * this.scaleFactor, enemyY);
+    ctx.fillText('>', cx + 80 * this.scaleFactor, enemyY);
 
     var enemyLabel = this.customEnemies === 0 ? 'AUTO' : '' + this.customEnemies;
-    ctx.font = this.customEnemies === 0 ? 'bold 20px "Rajdhani", sans-serif' : 'bold 24px "Rajdhani", sans-serif';
+    ctx.font = this.customEnemies === 0 ? 'bold ' + Math.round(20 * this.scaleFactor) + 'px "Rajdhani", sans-serif' : 'bold ' + Math.round(24 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = this.customEnemies === 0 ? 'rgba(253, 246, 227, 0.8)' : COLORS.ENEMY;
     ctx.fillText(enemyLabel, cx, enemyY);
 
-    var panelY = cy + 140;
+    var panelY = cy + 140 * this.scaleFactor;
     ctx.fillStyle = '#6b4423';
-    ctx.fillRect(cx - 170, panelY - 18, 340, 36);
+    ctx.fillRect(cx - 170 * this.scaleFactor, panelY - 18 * this.scaleFactor, 340 * this.scaleFactor, 36 * this.scaleFactor);
     ctx.strokeStyle = '#b8860b';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(cx - 170, panelY - 18, 340, 36);
+    ctx.lineWidth = Math.max(1, 2 * this.scaleFactor);
+    ctx.strokeRect(cx - 170 * this.scaleFactor, panelY - 18 * this.scaleFactor, 340 * this.scaleFactor, 36 * this.scaleFactor);
 
     var pulse = 0.5 + 0.5 * Math.sin(t * 3);
     if (Math.floor(this.gameTime / 400) % 2 === 0) {
-      ctx.font = 'bold 18px "Rajdhani", sans-serif';
+      ctx.font = 'bold ' + Math.round(18 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
       ctx.fillStyle = 'rgba(255, 224, 102, ' + (0.7 + pulse * 0.3) + ')';
       ctx.fillText('PRESS SPACE TO START', cx, panelY);
     }
 
-    ctx.font = '13px "Rajdhani", sans-serif';
+    ctx.font = Math.round(13 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = 'rgba(253, 246, 227, 0.6)';
-    ctx.fillText('← → adjust  ↑ ↓ select  SPACE start', cx, cy + 190);
-    ctx.fillText('WASD / Arrow Keys / Swipe to move', cx, cy + 210);
+    ctx.fillText('← → adjust  ↑ ↓ select  SPACE start', cx, cy + 190 * this.scaleFactor);
+    ctx.fillText('WASD / Arrow Keys / Swipe to move', cx, cy + 210 * this.scaleFactor);
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
@@ -1878,38 +1942,38 @@
 
   Game.prototype.renderOverlay = function (title, sub, bg) {
     var ctx = this.ctx;
-    var cx = W / 2, cy = H / 2;
+    var cx = this.W / 2, cy = this.H / 2;
 
     ctx.fillStyle = 'rgba(44, 24, 16, 0.8)';
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, this.W, this.H);
 
     ctx.fillStyle = '#6b4423';
-    ctx.fillRect(cx - 240, cy - 105, 480, 210);
+    ctx.fillRect(cx - 240 * this.scaleFactor, cy - 105 * this.scaleFactor, 480 * this.scaleFactor, 210 * this.scaleFactor);
     ctx.strokeStyle = '#b8860b';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(cx - 240, cy - 105, 480, 210);
+    ctx.lineWidth = Math.max(1, 4 * this.scaleFactor);
+    ctx.strokeRect(cx - 240 * this.scaleFactor, cy - 105 * this.scaleFactor, 480 * this.scaleFactor, 210 * this.scaleFactor);
     ctx.strokeStyle = 'rgba(255, 239, 213, 0.35)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(cx - 238, cy - 103, 476, 206);
+    ctx.lineWidth = Math.max(1, 1 * this.scaleFactor);
+    ctx.strokeRect(cx - 238 * this.scaleFactor, cy - 103 * this.scaleFactor, 476 * this.scaleFactor, 206 * this.scaleFactor);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    ctx.font = 'bold 46px "Rajdhani", sans-serif';
+    ctx.font = 'bold ' + Math.round(46 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = '#3d2b1f';
-    ctx.fillText(title, cx + 2, cy - 20 + 2);
+    ctx.fillText(title, cx + 2 * this.scaleFactor, cy - 20 * this.scaleFactor + 2 * this.scaleFactor);
     ctx.fillStyle = COLORS.TEXT;
-    ctx.fillText(title, cx, cy - 20);
+    ctx.fillText(title, cx, cy - 20 * this.scaleFactor);
 
-    ctx.font = '18px "Rajdhani", sans-serif';
+    ctx.font = Math.round(18 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = 'rgba(253, 246, 227, 0.85)';
-    ctx.fillText(sub, cx, cy + 30);
+    ctx.fillText(sub, cx, cy + 30 * this.scaleFactor);
 
     if (Math.floor(this.gameTime / 400) % 2 === 0) {
       var pulse = 0.5 + 0.5 * Math.sin(this.gameTime / 250);
-      ctx.font = 'bold 16px "Rajdhani", sans-serif';
+      ctx.font = 'bold ' + Math.round(16 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
       ctx.fillStyle = 'rgba(255, 224, 102, ' + (0.6 + pulse * 0.4) + ')';
-      ctx.fillText('PRESS SPACE', cx, cy + 80);
+      ctx.fillText('PRESS SPACE', cx, cy + 80 * this.scaleFactor);
     }
 
     ctx.textAlign = 'left';
@@ -1918,45 +1982,45 @@
 
   Game.prototype.renderLevelComplete = function () {
     var ctx = this.ctx;
-    var cx = W / 2, cy = H / 2;
+    var cx = this.W / 2, cy = this.H / 2;
     var level = LEVELS[this.currentLevel];
     var t = this.gameTime / 1000;
 
     ctx.fillStyle = 'rgba(44, 24, 16, 0.85)';
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, this.W, this.H);
 
     ctx.fillStyle = '#6b4423';
-    ctx.fillRect(cx - 270, cy - 125, 540, 250);
+    ctx.fillRect(cx - 270 * this.scaleFactor, cy - 125 * this.scaleFactor, 540 * this.scaleFactor, 250 * this.scaleFactor);
     ctx.strokeStyle = '#b8860b';
-    ctx.lineWidth = 5;
-    ctx.strokeRect(cx - 270, cy - 125, 540, 250);
+    ctx.lineWidth = Math.max(1, 5 * this.scaleFactor);
+    ctx.strokeRect(cx - 270 * this.scaleFactor, cy - 125 * this.scaleFactor, 540 * this.scaleFactor, 250 * this.scaleFactor);
     ctx.strokeStyle = 'rgba(255, 239, 213, 0.35)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(cx - 268, cy - 123, 536, 246);
+    ctx.lineWidth = Math.max(1, 2 * this.scaleFactor);
+    ctx.strokeRect(cx - 268 * this.scaleFactor, cy - 123 * this.scaleFactor, 536 * this.scaleFactor, 246 * this.scaleFactor);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    ctx.font = 'bold 40px "Rajdhani", sans-serif';
+    ctx.font = 'bold ' + Math.round(40 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = '#3d2b1f';
-    ctx.fillText('LEVEL COMPLETE!', cx + 2, cy - 65 + 2);
+    ctx.fillText('LEVEL COMPLETE!', cx + 2 * this.scaleFactor, cy - 65 * this.scaleFactor + 2 * this.scaleFactor);
     ctx.fillStyle = COLORS.PLAYER;
-    ctx.fillText('LEVEL COMPLETE!', cx, cy - 65);
+    ctx.fillText('LEVEL COMPLETE!', cx, cy - 65 * this.scaleFactor);
 
-    ctx.font = '20px "Rajdhani", sans-serif';
+    ctx.font = Math.round(20 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = 'rgba(253, 246, 227, 0.85)';
-    ctx.fillText('"' + level.name + '" Cleared', cx, cy - 25);
+    ctx.fillText('"' + level.name + '" Cleared', cx, cy - 25 * this.scaleFactor);
 
-    ctx.font = 'bold 18px "Rajdhani", sans-serif';
+    ctx.font = 'bold ' + Math.round(18 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = '#e2c36b';
-    ctx.fillText('Captured: ' + this.progress + '%', cx, cy + 15);
-    ctx.fillText('Score: ' + this.score, cx, cy + 45);
+    ctx.fillText('Captured: ' + this.progress + '%', cx, cy + 15 * this.scaleFactor);
+    ctx.fillText('Score: ' + this.score, cx, cy + 45 * this.scaleFactor);
 
     var pulse = 0.5 + 0.5 * Math.sin(t * 3);
     if (Math.floor(this.gameTime / 400) % 2 === 0) {
-      ctx.font = 'bold 16px "Rajdhani", sans-serif';
+      ctx.font = 'bold ' + Math.round(16 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
       ctx.fillStyle = 'rgba(255, 224, 102, ' + (0.6 + pulse * 0.4) + ')';
-      ctx.fillText('PRESS SPACE FOR NEXT LEVEL', cx, cy + 95);
+      ctx.fillText('PRESS SPACE FOR NEXT LEVEL', cx, cy + 95 * this.scaleFactor);
     }
 
     ctx.textAlign = 'left';
@@ -1965,62 +2029,62 @@
 
   Game.prototype.renderVictory = function () {
     var ctx = this.ctx;
-    var cx = W / 2, cy = H / 2;
+    var cx = this.W / 2, cy = this.H / 2;
     var t = this.gameTime / 1000;
 
-    var skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+    var skyGrad = ctx.createLinearGradient(0, 0, 0, this.H);
     skyGrad.addColorStop(0, '#3a4f6b');
     skyGrad.addColorStop(0.5, '#6a4b2a');
     skyGrad.addColorStop(1, '#2c1810');
     ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, this.W, this.H);
 
     for (var i = 0; i < 40; i++) {
-      var sx = (Math.sin(t * 0.5 + i * 0.3) * 150 + cx + i * 15) % W;
-      var sy = ((i * 10 + t * 25) % H);
+      var sx = (Math.sin(t * 0.5 + i * 0.3) * 150 * this.scaleFactor + cx + i * 15 * this.scaleFactor) % this.W;
+      var sy = ((i * 10 * this.scaleFactor + t * 25 * this.scaleFactor) % this.H);
       ctx.fillStyle = 'rgba(255, 224, 102, ' + (0.45 + Math.sin(t * 3 + i) * 0.25) + ')';
       ctx.beginPath();
-      ctx.arc(sx, sy, 1.4, 0, Math.PI * 2);
+      ctx.arc(sx, sy, Math.max(1, 1.4 * this.scaleFactor), 0, Math.PI * 2);
       ctx.fill();
     }
 
     ctx.fillStyle = '#6b4423';
-    ctx.fillRect(cx - 270, cy - 125, 540, 250);
+    ctx.fillRect(cx - 270 * this.scaleFactor, cy - 125 * this.scaleFactor, 540 * this.scaleFactor, 250 * this.scaleFactor);
     ctx.strokeStyle = '#b8860b';
-    ctx.lineWidth = 5;
-    ctx.strokeRect(cx - 270, cy - 125, 540, 250);
+    ctx.lineWidth = Math.max(1, 5 * this.scaleFactor);
+    ctx.strokeRect(cx - 270 * this.scaleFactor, cy - 125 * this.scaleFactor, 540 * this.scaleFactor, 250 * this.scaleFactor);
     ctx.strokeStyle = 'rgba(255, 239, 213, 0.35)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(cx - 268, cy - 123, 536, 246);
+    ctx.lineWidth = Math.max(1, 2 * this.scaleFactor);
+    ctx.strokeRect(cx - 268 * this.scaleFactor, cy - 123 * this.scaleFactor, 536 * this.scaleFactor, 246 * this.scaleFactor);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
     var pulse = 0.8 + 0.2 * Math.sin(t * 4);
-    ctx.font = 'bold 54px "Rajdhani", sans-serif';
+    ctx.font = 'bold ' + Math.round(54 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = '#3d2b1f';
-    ctx.fillText('VICTORY!', cx + 2, cy - 60 + 2);
+    ctx.fillText('VICTORY!', cx + 2 * this.scaleFactor, cy - 60 * this.scaleFactor + 2 * this.scaleFactor);
     ctx.fillStyle = COLORS.PLAYER;
-    ctx.fillText('VICTORY!', cx, cy - 60);
+    ctx.fillText('VICTORY!', cx, cy - 60 * this.scaleFactor);
 
-    ctx.font = '22px "Rajdhani", sans-serif';
+    ctx.font = Math.round(22 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = COLORS.TEXT;
-    ctx.fillText('All Levels Cleared!', cx, cy - 10);
+    ctx.fillText('All Levels Cleared!', cx, cy - 10 * this.scaleFactor);
 
-    ctx.font = 'bold 20px "Rajdhani", sans-serif';
+    ctx.font = 'bold ' + Math.round(20 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
     ctx.fillStyle = '#e2c36b';
-    ctx.fillText('FINAL SCORE: ' + this.score, cx, cy + 30);
+    ctx.fillText('FINAL SCORE: ' + this.score, cx, cy + 30 * this.scaleFactor);
 
     if (this.score >= this.highScore) {
-      ctx.font = 'bold 18px "Rajdhani", sans-serif';
+      ctx.font = 'bold ' + Math.round(18 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
       ctx.fillStyle = '#5a9a44';
-      ctx.fillText('★ NEW HIGH SCORE! ★', cx, cy + 65);
+      ctx.fillText('★ NEW HIGH SCORE! ★', cx, cy + 65 * this.scaleFactor);
     }
 
     if (Math.floor(this.gameTime / 400) % 2 === 0) {
-      ctx.font = 'bold 16px "Rajdhani", sans-serif';
+      ctx.font = 'bold ' + Math.round(16 * this.scaleFactor) + 'px "Rajdhani", sans-serif';
       ctx.fillStyle = 'rgba(255, 224, 102, ' + (0.6 + pulse * 0.4) + ')';
-      ctx.fillText('PRESS SPACE', cx, cy + 105);
+      ctx.fillText('PRESS SPACE', cx, cy + 105 * this.scaleFactor);
     }
 
     ctx.textAlign = 'left';
